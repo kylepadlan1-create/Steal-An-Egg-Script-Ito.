@@ -1,0 +1,98 @@
+-- Delta Executor: 2ms Ultra-Fast Chain Teleport to End
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local coordinates = {
+    Vector3.new(6328.50, 70.57, -366.18),
+    Vector3.new(6045.77, 70.57, -363.27),
+    Vector3.new(5625.04, 70.57, -368.28),
+    Vector3.new(5129.81, 70.57, -358.28),
+    Vector3.new(4770.74, 70.57, -361.92),
+    Vector3.new(4236.96, 70.57, -364.27),
+    Vector3.new(3706.82, 70.57, -362.15),
+    Vector3.new(3323.85, 70.57, -366.55),
+    Vector3.new(2885.22, 70.57, -353.91),
+    Vector3.new(2885.29, 70.57, -359.87),
+    Vector3.new(2393.40, 70.57, -362.95),
+    Vector3.new(2219.13, 70.57, -369.95),
+    Vector3.new(1949.96, 70.57, -364.33),
+    Vector3.new(1783.42, 70.57, -362.07),
+    Vector3.new(1566.46, 70.57, -367.26),
+    Vector3.new(1242.11, 70.57, -347.61),
+    Vector3.new(1006.23, 70.57, -352.48),
+    Vector3.new(794.27, 70.57, -362.00),
+    Vector3.new(650.48, 70.57, -351.81),
+    Vector3.new(536.22, 70.57, -361.47),
+    Vector3.new(551.64, 70.57, -364.15)
+}
+
+local function getStartingIndex()
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return 1 end
+    
+    local playerPos = character.HumanoidRootPart.Position
+    local closestIndex = 1
+    local minDistance = math.huge
+    
+    for i, coord in ipairs(coordinates) do
+        local distance = (playerPos - coord).Magnitude
+        if distance < minDistance then
+            minDistance = distance
+            closestIndex = i
+        end
+    end
+    
+    return math.min(closestIndex + 1, #coordinates)
+end
+
+local function startChainTeleport()
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local startIndex = getStartingIndex()
+    
+    for i = startIndex, #coordinates do
+        local targetPos = coordinates[i]
+        character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+        
+        task.wait(0.002) 
+    end
+    
+    print("2ms Chain Teleport Complete! Nakarating na sa huling coordinate.")
+end
+
+ProximityPromptService.PromptTriggered:Connect(function(prompt, player)
+    if player == LocalPlayer then
+        if prompt.HoldDuration > 0 then
+            prompt.HoldDuration = 0
+        end
+        task.wait(0.002)
+        startChainTeleport()
+    end
+end)
+
+for _, prompt in pairs(game:GetDescendants()) do
+    if prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+    end
+end
+
+print("Delta Executor: 2ms Ultra-Fast Chain Teleport Active (Updated)!")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local tpSpeed = 20
+
+RunService.Heartbeat:Connect(function(deltaTime)
+    local character = LocalPlayer.Character
+    if character then
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChild("Humanoid")
+        
+        if hrp and humanoid and humanoid.MoveDirection.Magnitude > 0 then
+            hrp.CFrame = hrp.CFrame + (humanoid.MoveDirection * tpSpeed * deltaTime * 10)
+        end
+    end
+end)
